@@ -1,0 +1,36 @@
+defaults: &defaults
+  working_directory: ~/cra_circle_test
+  docker:
+    - image: circleci/node:8.11
+version: 2
+jobs:
+  build:
+    docker:
+      - image: circleci/node:8.11
+    steps:
+      - checkout
+      - restore_cache:
+          keys:
+            - node-modules-{{ checksum "package.json" }}
+      - run:
+          name: Install Node modules
+          command: npm install
+      - run:
+          name: "Build app"
+          command: npm run build
+      - save_cache:
+          key: node-modules-{{ checksum "package.json" }}
+          paths:
+            - node_modules
+      - save_cache:
+          key: build-{{ .Revision }}
+          paths:
+            - build
+            - public
+
+workflows:
+  version: 2
+  build-test-deploy:
+    jobs:
+      - build
+      
